@@ -44,7 +44,7 @@ class _BouncyState extends State<Bouncy> with SingleTickerProviderStateMixin {
   double _scale;
 
   /// Key of the given child used to get its size and position whenever we need
-  GlobalKey _childKey = GlobalKey();
+  final GlobalKey _childKey = GlobalKey();
 
   /// If the touch position is outside or not of the given child
   bool _isOutside = false;
@@ -61,7 +61,6 @@ class _BouncyState extends State<Bouncy> with SingleTickerProviderStateMixin {
   /// Simple getter on widget's animation duration
   Duration get duration => widget.duration;
 
-
   /// We instantiate the animation controller
   /// The idea is to call setState() each time the controller's
   /// value changes
@@ -70,7 +69,6 @@ class _BouncyState extends State<Bouncy> with SingleTickerProviderStateMixin {
     _controller = AnimationController(
       vsync: this,
       duration: duration,
-      lowerBound: 0.0,
       upperBound: 0.1,
     )..addListener(() {
         setState(() {});
@@ -107,19 +105,19 @@ class _BouncyState extends State<Bouncy> with SingleTickerProviderStateMixin {
   }
 
   /// Simple method called when we need to notify the user of a press event
-  _triggerOnPressed() {
+  void _triggerOnPressed() {
     if (onPressed != null) {
       onPressed();
     }
   }
 
   /// We start the animation
-  _onTapDown(TapDownDetails details) {
+  void _onTapDown(TapDownDetails details) {
     _controller.forward();
   }
 
   /// We reverse the animation and notify the user of a press event
-  _onTapUp(TapUpDetails details) {
+  void _onTapUp(TapUpDetails details) {
     Future.delayed(duration, () {
       _controller.reverse();
     });
@@ -129,14 +127,14 @@ class _BouncyState extends State<Bouncy> with SingleTickerProviderStateMixin {
 
   /// Here we are listening on each change when drag event is triggered
   /// We must keep the [_isOutside] value updated in order to use it later
-  _onDragUpdate(DragUpdateDetails details, BuildContext context) {
+  void _onDragUpdate(DragUpdateDetails details, BuildContext context) {
     final Offset touchPosition = details.globalPosition;
     _isOutside = _isOutsideChildBox(touchPosition);
   }
 
   /// When this callback is triggered, we reverse the animation
   /// If the touch position is inside the children renderBox, we notify the user of a press event
-  _onLongPressEnd(LongPressEndDetails details, BuildContext context) {
+  void _onLongPressEnd(LongPressEndDetails details, BuildContext context) {
     final Offset touchPosition = details.globalPosition;
 
     if (!_isOutsideChildBox(touchPosition)) {
@@ -149,7 +147,7 @@ class _BouncyState extends State<Bouncy> with SingleTickerProviderStateMixin {
   /// When this callback is triggered, we reverse the animation
   /// As we do not have position details, we use the [_isOutside] field to know
   /// if we need to notify the user of a press event
-  _onDragEnd(DragEndDetails details) {
+  void _onDragEnd(DragEndDetails details) {
     if (!_isOutside) {
       _triggerOnPressed();
     }
@@ -159,17 +157,17 @@ class _BouncyState extends State<Bouncy> with SingleTickerProviderStateMixin {
   /// Method called when we need to now if a specific touch position is inside the given
   /// child render box
   bool _isOutsideChildBox(Offset touchPosition) {
-    final RenderBox childRenderBox = _childKey.currentContext.findRenderObject();
+    final RenderBox childRenderBox =
+        _childKey.currentContext.findRenderObject() as RenderBox;
     final Size childSize = childRenderBox.size;
     final Offset childPosition = childRenderBox.localToGlobal(Offset.zero);
 
-    return (touchPosition.dx < childPosition.dx ||
+    return touchPosition.dx < childPosition.dx ||
         touchPosition.dx > childPosition.dx + childSize.width ||
         touchPosition.dy < childPosition.dy ||
-        touchPosition.dy > childPosition.dy + childSize.height);
+        touchPosition.dy > childPosition.dy + childSize.height;
   }
 }
-
 ```
 
 
